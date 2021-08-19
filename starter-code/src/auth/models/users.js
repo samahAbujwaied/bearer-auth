@@ -1,5 +1,5 @@
 'use strict';
-const SECRET = process.env.SECRET || "samah:12345";
+const SECRET = process.env.SECRET || 'secretstringg';
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const userSchema = (sequelize, DataTypes) => {
@@ -20,12 +20,10 @@ const userSchema = (sequelize, DataTypes) => {
          return jwt.sign(tokenObj, SECRET);
       }
     }
+
+   
   });
 
-  model.beforeCreate(async (user) => {
-    let hashedPass = bcrypt.hash(user.password, 10);
-    user.password = hashedPass;
-  });
 
   // Basic AUTH: Validating strings (username, password) 
   model.authenticateBasic = async function (username, password) {
@@ -39,10 +37,13 @@ const userSchema = (sequelize, DataTypes) => {
   
 
   // Bearer AUTH: Validating a token
+  
   model.authenticateToken = async function (token) {
+    console.log('in authenticateToken');
     try {
-      const parsedToken = jwt.verify(token, process.env.SECRET);
+      const parsedToken = jwt.verify(token,SECRET);
       const user = this.findOne({ username: parsedToken.username })
+      console.log('user',user);
       if (user) { return user; }
       throw new Error("User Not Found");
     } catch (e) {
@@ -56,29 +57,3 @@ const userSchema = (sequelize, DataTypes) => {
 module.exports = userSchema;
 
  
-    
-//     Users.authenticateToken = async function(token) {
-//         try {
-//             console.log('samah token -------->',token);
-//             console.log('samah secret ------->',SECRET);
-//             console.log('jwt verify------>',jwt.verify(token, SECRET));
-//             const parsedToken = jwt.verify(token, SECRET); // {username: rawan ... }
-//             console.log('samah verify----->',parsedToken);
-//             const user = await this.findOne({ where: {username: parsedToken.username} });
-//             console.log('user token ------>',user);
-//             if(user) {
-//                 return user;
-//             }
-//             throw new Error('invalid token')
-//         } catch(e) {
-//             throw new Error(e.message);
-//         }
-        
-//     }
-
-//     return Users;
-// }
-
-
-
-// module.exports = UserSchema;

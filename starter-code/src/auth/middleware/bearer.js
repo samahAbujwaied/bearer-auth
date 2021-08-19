@@ -1,23 +1,28 @@
 'use strict';
-const base64 = require('base-64')
-const  users  = require('../models/users');
+
+const { users } = require('../models/')
 
 module.exports = async (req, res, next) => {
-  if (!req.headers.authorization)
-  { next('Invalid Login')
-  return;
-   }
+ console.log('users',users);
+ const token = req.headers.authorization.split(' ').pop();
+ const validUser = await users.authenticateToken(token);
+ console.log('validUser',validUser);
   try {
 
+    if (!req.headers.authorization) { _authError() }
+
     const token = req.headers.authorization.split(' ').pop();
-    const validUser = await users.authenticateWithToken(token);
+    const validUser = await users.authenticateToken(token);
     req.user = validUser;
     req.token = validUser.token;
-    next()
+ 
+    next();
 
   } catch (e) {
-    res.status(403).send('Invalid Login');;
+    next('Invalid Login catch');
+  }
+
+  function _authError() {
+    next('Invalid Login ');
   }
 }
-
-
