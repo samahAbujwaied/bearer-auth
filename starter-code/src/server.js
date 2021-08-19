@@ -12,6 +12,9 @@ const authRoutes = require('./auth/routes');
 const app = express();
 
 // App Level MW
+app.get('/',(req,res)=>{
+  res.json('Is connected ')
+})
 app.use(cors());
 app.use(morgan('dev'));
 

@@ -10,9 +10,7 @@ const basicAuth = require('./middleware/basic.js')
 const bearerAuth = require('./middleware/bearer')
 
 
-authRouter.get('/', (req, res)=> {
-  res.send('Its connected')
-});
+
 authRouter.post('/signup', async (req, res, next) => {
 
   console.log("inside signup !!! ");
