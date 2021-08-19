@@ -1,47 +1,43 @@
 'use strict';
-
+require('dotenv').config();
 const express = require('express');
 const authRouter = express.Router();
 const bcrypt = require('bcrypt');
-const users = require('./models/users');
-// const bearerdb = require('../auth/models/users')
+const {users} = require('./models');
+
+
 const basicAuth = require('./middleware/basic.js')
-const bearerAuth = require('./middleware/bearer.js')
-const {Sequelize, DataTypes} = require('sequelize');
-const POSTGRES_URI = 'postgres://localhost:5432/user';
-// config for prod
-const sequelize = new Sequelize(POSTGRES_URI, {});
-const UserSchema = users(sequelize, DataTypes);
+const bearerAuth = require('./middleware/bearer')
+
 authRouter.post('/signup', async (req, res, next) => {
 
   console.log("inside signup !!! ");
-    console.log({body: req.body})
+    console.log('req.body',req.body)
     try {
-        const password = await bcrypt.hash(req.body.password, 10);
-        console.log("req.body.password :", password)
-        const record = await UserSchema.create(req.body );
-        console.log("record >>>>> ", record)
-        // console.log(await record.password);
+       req.body.password = await bcrypt.hash(req.body.password, 10);
+        const record = await users.create(req.body );
         res.json(record);
-    } catch (e) {
+    } 
+    catch (e) {
         console.log(e);
-        next('invalid')
-        // res.status(500).json({err: 'invalid'})
+
+        res.status(500).json({err: 'invalid'})
     }
 });
 
-authRouter.post('/signin', basicAuth(UserSchema), (req, res, next) => {
-  res.status(200).json(req.user);
-  // const user = {
-  //   user: req.user,
-  //   token: req.user.token
-  // };
-  // res.status(200).json(user);
-});
+
+authRouter.post('/signin', basicAuth, (req, res, next) => {
+  const user = {
+      user: req.user,
+      token: req.user.token
+    };
+    res.status(200).json(user);
+  });
+  
 
 authRouter.get('/users', bearerAuth, async (req, res, next) => {
-  const users = await UserSchema.findAll({});
-  const list = users.map(user => user.username);
+  const userRecords = await users.findAll({});
+  const list = userRecords.map(user => user.username);
   res.status(200).json(list);
 });
 
